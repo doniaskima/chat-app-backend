@@ -3,8 +3,6 @@ const SavedMessage = require("../models/savedMessage.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
-
-
 const login = async(req, res) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email: email }).catch((err) => {
@@ -38,6 +36,46 @@ const login = async(req, res) => {
 }
 
 
+const signup = async(req, res) => {
+    const { name, password, email } = req.body;
+    const user = await User.findOne({ email: email }).catch((err) => {
+        console.log(err);
+    });
+    if (user) {
+        return res.json({
+            token: null,
+            user: null,
+            status: false,
+            message: "Account with email already exists, try loggin in instead !"
+        });
+    }
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const newUser = new User({
+            name: name,
+            email: email,
+            password: hashedPassword,
+        });
+        const savedUser = await newUser.save();
+        const token = jwt.sign({ id: savedUser._id, name: savedUser.name }, secret);
+        return res.json({
+            user: savedUser,
+            token: token,
+            status: true,
+            message: "Signed up successfully",
+        })
+    } catch (err) {
+        return res.json({
+            status: false,
+            user:null,
+            token:null,
+            message:err.message,
+       });
+    }
+};
+
 module.exports = {
     login,
-}
+    signup,
+}   
+ 
