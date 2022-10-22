@@ -90,8 +90,18 @@ const findUser = async(req, res, next, userId) => {
     }
 }
 
+
+const getById = (req, res) => {
+    const { userInfo } = req;
+    return res
+        .status(200)
+        .json({ status: true, user: userInfo, message: "User found" });
+}
+
+
 module.exports = {
     login,
     signup,
-    findUser
+    findUser,
+    getById
 }
