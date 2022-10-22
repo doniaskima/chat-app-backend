@@ -98,6 +98,17 @@ const getById = (req, res) => {
         .json({ status: true, user: userInfo, message: "User found" });
 }
 
+const deleteUser = (req, res) => {
+    const { userInfo } = req;
+    userInfo
+        .delete()
+        .then(() => {
+            return res.json({ status: true, message: "user deleted" });
+        })
+        .catch((err) => {
+            return res.json({ status: false, message: err.message });
+        });
+};
 
 module.exports = {
     login,
