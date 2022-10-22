@@ -67,15 +67,31 @@ const signup = async(req, res) => {
     } catch (err) {
         return res.json({
             status: false,
-            user:null,
-            token:null,
-            message:err.message,
-       });
+            user: null,
+            token: null,
+            message: err.message,
+        });
     }
 };
+
+
+const findUser = async(req, res, next, userId) => {
+    try {
+        const user = await User.findOne({ _id: userId }).catch((err) => {
+            console.log(err);
+        });
+        if (!user) {
+            return res.status(400).json({ status: false, message: "User not found" });
+        }
+        req.userInfo = user;
+        next();
+    } catch (error) {
+        return res.status(400).json({ status: false, message: error.message });
+    }
+}
 
 module.exports = {
     login,
     signup,
-}   
- 
+    findUser
+}
