@@ -123,10 +123,24 @@ const deleteUser = (req, res) => {
         });
 };
 
+const updateUserDetails = async(req, res) => {
+    let { userInfo } = req;
+    userInfo = await User.findById(userInfo._id);
+    const update = req.body;
+    if (update._id) {
+        return res.status(400).json({ status: false, message: "Forbidden request" });
+    }
+    userInfo.name = update.name;
+    userInfo = await userInfo.save();
+    return res.json({ status: true, message: "Details updated" });
+};
+
 module.exports = {
     login,
     signup,
     findUser,
     getById,
     getByEmail,
+    deleteUser,
+    updateUserDetails
 }
