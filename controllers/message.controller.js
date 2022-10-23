@@ -1,6 +1,9 @@
 const Message = require("../models/user.model");
 const crypto = require("crypto");
 const User = require("../models/user.model");
+
+
+
 const encrypt = (message) => {
     // key to encrypt and decrypted  (random 32 Bytes)
     const key = crypto.randomBytes(32);
@@ -17,3 +20,32 @@ const encrypt = (message) => {
         key: key.toString("hex"),
     };
 };
+
+const createMessage = async(senderId, receiverId, message) => {
+    let info = null;
+    let isNewRecipient = false;
+    const user = await User.findOne({ _id: senderId }).catch((err) => {
+        console.log(err);
+    })
+    if (user) {
+        const receiver = await User.findOne({ email: receiverEmail });
+        if (receiver) {
+            if (!receiver.chats.includes(senderId)) {
+                isNewRecipient = true;
+                receiver.chats.push(senderId);
+                await receiver.save();
+            }
+            const encryptMessage = encrypt(message);
+            const newMessage = new Message({
+                sender: senderId,
+                receiver: receiver._id,
+                message: encryptedMessage.encryptedMessage,
+                iv: encryptedMessage.iv,
+                key: encryptedMessage.key,
+
+            });
+            await newMessage.save();
+
+        }
+    }
+}
