@@ -98,6 +98,19 @@ const getById = (req, res) => {
         .json({ status: true, user: userInfo, message: "User found" });
 }
 
+const getByEmail = async(req, res) => {
+    const { email } = req;
+    const user = await User.findOne({ email: email }, "name _id name");
+    if (user) {
+        return res.status(200).json({
+            status: true,
+            user: user,
+            message: "User found"
+        });
+    }
+    return res.json({ status: false, user: user, message: "User found" });
+};
+
 const deleteUser = (req, res) => {
     const { userInfo } = req;
     userInfo
@@ -114,5 +127,6 @@ module.exports = {
     login,
     signup,
     findUser,
-    getById
+    getById,
+    getByEmail,
 }

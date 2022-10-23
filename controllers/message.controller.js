@@ -1,7 +1,6 @@
 const Message = require("../models/user.model");
 const crypto = require("crypto");
 const User = require("../models/user.model");
-
 const encrypt = (message) => {
     // key to encrypt and decrypted  (random 32 Bytes)
     const key = crypto.randomBytes(32);
