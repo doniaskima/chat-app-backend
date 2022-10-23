@@ -45,7 +45,29 @@ const createMessage = async(senderId, receiverId, message) => {
 
             });
             await newMessage.save();
+            info = {
+                sender: { name: user.name, email: user.email, _id: user._id },
+                receiver: {
+                    name: receiver.name,
+                    _id: receiver._id,
+                    email: receiver.email,
+                },
+                iv: newMessage.iv,
+                key: newMessage.key,
+                message: newMessage.message,
+                createdAt: message.createdAt,
+                messageId: newMessage._id,
+            };
 
         }
     }
+    return { info, isNewRecipient };
+}
+
+
+
+
+
+module.exports = {
+    createMessage
 }
