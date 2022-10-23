@@ -64,10 +64,33 @@ const createMessage = async(senderId, receiverId, message) => {
     return { info, isNewRecipient };
 }
 
-
+const startMessage = async(senderId, receiverId) => {
+    const user = await User.findOne({ _id: senderId });
+    if (user) {
+        const receiver = await User.findOne({ email: receiverEmail });
+        if (receiver) {
+            if (!user.chats.includes(senderId) && user._id !== receiver.id) {
+                user.chats.push(receiver._id);
+                await user
+                    .save()
+                    .then(() => {
+                        return true;
+                    })
+                    .catch(() => {
+                        return null;
+                    })
+            } else {
+                return null;
+            }
+        }
+    } else {
+        return null;
+    }
+}
 
 
 
 module.exports = {
-    createMessage
+    createMessage,
+    startMessage
 }
