@@ -31,6 +31,26 @@ app.use(helmet());
 app.use(compression());
 const server = http.createServer(app);
 const io = socketio(server, { cors: true });
+const connectUsers = new Map();
+let groups = {};
+
+io.on("connetion", (socket) => {
+    let { id } = socket.client;
+
+    socket.on("connectUser", ({ name }) => {
+        connectUsers.set(name, [socket.client.id, socket.id]);
+        io.emit("onlineUsers", Array.from(connectUsers.keys()));
+    });
+    socket.on("disconnect", () => {
+        for (let key of connectedUser.keys()) {
+            if (connectedUsers.get(key)[0] === id) {
+                connectedUsers.delete(key);
+                break;
+            }
+        }
+        io.emit("onlineUsers", Array.from(connectedUsers.keys()));
+    })
+})
 
 //routes middleware
 
