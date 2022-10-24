@@ -1,5 +1,5 @@
 const User = require("../models/user.model");
-const SavedMessage = require("../models/savedMessage.model");
+const SavedMessage = require("../models/savedMessag.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 

@@ -2,12 +2,16 @@
 require("dotenv").config();
 const express = require("express");
 const app = express();
+const http = require("http");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
 const helmet = require("helmet");
+const socketio = require("socket.io");
 const compression = require("compression");
-
-//DB connection
+const userRouter = require("./routes/user.routes");
+const messageRouter = require("./routes/message.routes");
+const groupRouter = require("./routes/group.route")
+    //DB connection
 mongoose.connect(process.env.MONGO_DB_URI);
 mongoose.connection.on("connected", () => {
     console.log("DB connected");
@@ -16,13 +20,17 @@ mongoose.connection.on("error", (err) => {
     console.log("mongodb failed with", err);
 });
 //import routes
-
+app.use("/users", userRouter);
+// app.use("/messages", messageRouter);
+// app.use("/groups", groupRouter);
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(morgan("dev"));
 app.use(helmet());
 app.use(compression());
+const server = http.createServer(app);
+const io = socketio(server, { cors: true });
 
 //routes middleware
 
