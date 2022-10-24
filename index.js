@@ -49,6 +49,9 @@ io.on("connetion", (socket) => {
             }
         }
         io.emit("onlineUsers", Array.from(connectedUsers.keys()));
+    });
+    socket.on("startMessage", ({ senderId, receiverEmail }) => {
+        startMessage(senderId, receiverEmail);
     })
 })
 
