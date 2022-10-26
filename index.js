@@ -82,14 +82,16 @@ io.on("connetion", (socket) => {
             io.to(`${group.name}:${group.groupCode}`).emit("groupMessage", res);
         });
     });
-})
+    socket.on("joinGroup", ({ userInfo, group }) => {
 
-//routes middleware
+    })
 
-const port = 8000;
+    //routes middleware
 
-app.listen(port, () => {
+    const port = 8000;
+
+    app.listen(port, () => {
+        console.log(`Example app listening on port ${port}`);
+    });
     console.log(`Example app listening on port ${port}`);
-});
-console.log(`Example app listening on port ${port}`);
 });
