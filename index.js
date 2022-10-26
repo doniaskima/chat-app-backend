@@ -83,15 +83,20 @@ io.on("connetion", (socket) => {
         });
     });
     socket.on("joinGroup", ({ userInfo, group }) => {
-
-    })
-
-    //routes middleware
-
-    const port = 8000;
-
-    app.listen(port, () => {
-        console.log(`Example app listening on port ${port}`);
+        socket.join(`${group.name}:${group.groupCode}`);
+        if (!groups[group.name]) {
+            groups[group.name] = [userInfo];
+        } else if (!groups[group.name].find((user) => user._id === userInfo._id)) {
+            groups[group.name].push(userInfo);
+        }
     });
+});
+//routes middleware
+
+const port = 8000;
+
+app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
+});
+console.log(`Example app listening on port ${port}`);
 });
