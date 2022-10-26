@@ -53,6 +53,10 @@ io.on("connetion", (socket) => {
     socket.on("startMessage", ({ senderId, receiverEmail }) => {
         startMessage(senderId, receiverEmail);
     })
+    socket.on("sendMessage", ({ sender, receiver, message }) => {
+        const { email, name } = receiver;
+        let receiverSocketId = connectedUser.get(sender.name)[1];
+    })
 })
 
 //routes middleware
