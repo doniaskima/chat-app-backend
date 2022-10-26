@@ -78,8 +78,10 @@ io.on("connetion", (socket) => {
         })
     })
     socket.on("sendGroupMessage", ({ sender, group, message }) => {
-
-    })
+        createGroupMessage(sender, group._id, message).then((res) => {
+            io.to(`${group.name}:${group.groupCode}`).emit("groupMessage", res);
+        });
+    });
 })
 
 //routes middleware
