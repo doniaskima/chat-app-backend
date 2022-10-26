@@ -71,6 +71,12 @@ io.on("connetion", (socket) => {
             }
         );
     });
+    socket.on("savedMessage", ({ user, message }) => {
+        let userSocketId = connectedUsers.get(user.name)[1];
+        saveMessage(user._id, message).then((res) => {
+            io.to(userSocketId).emit("savedMessage", res);
+        })
+    })
 })
 
 //routes middleware
