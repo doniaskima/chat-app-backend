@@ -77,6 +77,9 @@ io.on("connetion", (socket) => {
             io.to(userSocketId).emit("savedMessage", res);
         })
     })
+    socket.on("sendGroupMessage", ({ sender, group, message }) => {
+
+    })
 })
 
 //routes middleware
