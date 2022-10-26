@@ -55,7 +55,14 @@ io.on("connetion", (socket) => {
     })
     socket.on("sendMessage", ({ sender, receiver, message }) => {
         const { email, name } = receiver;
-        let receiverSocketId = connectedUser.get(sender.name)[1];
+        let receiverSocketId = connectedUser.get(name) === undefined ? false : connectedUsers.get(name)[1];
+        let senderSocketId = connectedUsers.get(sender.name)[1];
+        createMessage(sender._id, email, message).then(
+            ({ info, isNewRecipient }) => {
+
+            }
+        )
+
     })
 })
 
@@ -65,4 +72,6 @@ const port = 8000;
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
+});
+console.log(`Example app listening on port ${port}`);
 });
