@@ -59,7 +59,12 @@ io.on("connetion", (socket) => {
         let senderSocketId = connectedUsers.get(sender.name)[1];
         createMessage(sender._id, email, message).then(
             ({ info, isNewRecipient }) => {
-
+                if (isNewRecipient && receiverSocketId) {
+                    io.to(receiverSocketId).emit("newRecipient", info);
+                } else if (receiverSocketId) {
+                    io.to(receiverSocketId).emit("message", info);
+                }
+                io.to(senderSocketId).emit("message", info);
             }
         )
 
