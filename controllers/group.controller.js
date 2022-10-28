@@ -28,7 +28,18 @@ const createGroup = async(req, res) => {
     return res.json({ status: false, message: "user not found" });
 }
 
+const fetchAllPublicGroups = (req, res) => {
+    Group.find({ isPublic: true }, "name _id description").then((groups) => {
+            return res.json({ status: true, groups: groups });
+        })
+        .catch((err) => {
+            console.log(err);
+            return res.json({ status: false, message: err.message });
+        })
+}
+
 
 module.exports = {
     createGroup,
+    fetchAllPublicGroups
 }
