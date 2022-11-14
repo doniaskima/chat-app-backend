@@ -21,6 +21,48 @@ const encrypt = (message) => {
     };
 };
 
+
+const createMessage = async(senderId, receiverEmail, message) => {
+    let info = null;
+    let isNewRecipient = false;
+    const user = await User.findOne({ _id: senderId }).catch((err) => {
+        console.log(err);
+    });
+    if (user) {
+        const receiver = await User.findOne({ email: receiverEmail });
+        if (receiver) {
+            if (!receiver.chats.includes(senderId)) {
+                isNewRecipient = true;
+                receiver.chats.push(senderId);
+                await receiver.save();
+            }
+            const encryptedMessage = encrypt(message);
+            const newMessage = new Message({
+                sender: senderId,
+                receiver: receiver._id,
+                message: encryptedMessage.encryptedMessage,
+                iv: encryptedMessage.iv,
+                key: encryptedMessage.key,
+            });
+            await newMessage.save();
+            info = {
+                sender: { name: user.name, email: user.email, _id: user._id },
+                receiver: {
+                    name: receiver.name,
+                    _id: receiver._id,
+                    email: receiver.email,
+                },
+                iv: newMessage.iv,
+                key: newMessage.key,
+                message: newMessage.message,
+                createdAt: message.createdAt,
+                messageId: newMessage._id,
+            };
+        }
+    }
+    return { info, isNewRecipient };
+};
+
 const deleteMessages = (senderId, receiverId) => {
     Message.deleteMany({ sender: senderId, receiver: receiverId })
         .then(() => {
@@ -45,8 +87,12 @@ const deleteMessages = (senderId, receiverId) => {
 
 
 module.exports = {
+    getMessages,
+    createGroupMessage,
     createMessage,
-    startMessage,
+    deleteMessages,
     deleteMessageById,
-    deleteMessages
-}
+    getGroupMessages,
+    startMessage,
+    encrypt,
+};
