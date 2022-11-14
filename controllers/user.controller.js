@@ -1,7 +1,12 @@
 const User = require("../models/user.model");
-const SavedMessage = require("../models/savedMessag.model");
+const savedMessage = require("../models/savedMessage.model");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const secret = process.env.JWT_SECRET;
+const Group = require("../models/group.model");
+const { deleteMessages, encrypt } = require("./message.controller");
+
+
 
 const login = async(req, res) => {
     const { email, password } = req.body;
@@ -19,7 +24,6 @@ const login = async(req, res) => {
                 token: token,
             });
         }
-
         return res.json({
             token: null,
             user: null,
@@ -33,11 +37,11 @@ const login = async(req, res) => {
         status: false,
         message: "No account found with entered email",
     })
+
 }
 
-
 const signup = async(req, res) => {
-    const { name, password, email } = req.body;
+    const { name, email, password } = req.body;
     const user = await User.findOne({ email: email }).catch((err) => {
         console.log(err);
     });
@@ -46,7 +50,7 @@ const signup = async(req, res) => {
             token: null,
             user: null,
             status: false,
-            message: "Account with email already exists, try loggin in instead !"
+            message: "Account with email already exists , Try loggign in instead !",
         });
     }
     try {
@@ -54,7 +58,8 @@ const signup = async(req, res) => {
         const newUser = new User({
             name: name,
             email: email,
-            password: hashedPassword,
+            status: false,
+            message: "Account with email already exists , Tr loggign in instead",
         });
         const savedUser = await newUser.save();
         const token = jwt.sign({ id: savedUser._id, name: savedUser.name }, secret);
@@ -62,9 +67,10 @@ const signup = async(req, res) => {
             user: savedUser,
             token: token,
             status: true,
-            message: "Signed up successfully",
-        })
+            message: "Signed up successfully"
+        });
     } catch (err) {
+        console.log(err);
         return res.json({
             status: false,
             user: null,
@@ -72,14 +78,13 @@ const signup = async(req, res) => {
             message: err.message,
         });
     }
-};
-
+}
 
 const findUser = async(req, res, next, userId) => {
     try {
         const user = await User.findOne({ _id: userId }).catch((err) => {
             console.log(err);
-        });
+        })
         if (!user) {
             return res.status(400).json({ status: false, message: "User not found" });
         }
@@ -90,25 +95,18 @@ const findUser = async(req, res, next, userId) => {
     }
 }
 
-
 const getById = (req, res) => {
     const { userInfo } = req;
-    return res
-        .status(200)
-        .json({ status: true, user: userInfo, message: "User found" });
-}
+    return res.status(200).json({ status: true, message: "User not found" });
+};
 
 const getByEmail = async(req, res) => {
-    const { email } = req;
-    const user = await User.findOne({ email: email }, "name _id name");
+    const { email } = req.params;
+    const user = await User.findOne({ email: email }, "name _id email");
     if (user) {
-        return res.status(200).json({
-            status: true,
-            user: user,
-            message: "User found"
-        });
+        return res.status(200).json({ status: true, user: user, message: "User found" });
     }
-    return res.json({ status: false, user: user, message: "User found" });
+    return res.json({ status: false, user: null, message: "User not found" });
 };
 
 const deleteUser = (req, res) => {
@@ -116,24 +114,83 @@ const deleteUser = (req, res) => {
     userInfo
         .delete()
         .then(() => {
-            return res.json({ status: true, message: "user deleted" });
+            return res.json({ status: true, message: "user deleted !" })
         })
         .catch((err) => {
             return res.json({ status: false, message: err.message });
         });
 };
 
+
 const updateUserDetails = async(req, res) => {
     let { userInfo } = req;
-    userInfo = await User.findById(userInfo._id);
+    userInfo = await User.findByd(userInfo._id);
     const update = req.body;
     if (update._id) {
-        return res.status(400).json({ status: false, message: "Forbidden request" });
+        return res.status(400).json({
+            status: false,
+            message: "Forbidden request, Id cannot be updated ",
+        });
     }
     userInfo.name = update.name;
     userInfo = await userInfo.save();
-    return res.json({ status: true, message: "Details updated" });
+    return res.status.json({ status: true, message: "Details updated" });
 };
+
+const saveMessage = async(userId, message) => {
+    const user = await User.findOne({ _id: userId });
+    const encryptedMessage = encrypt(message);
+    const newSavedMessage = new SavedMessage({
+        owner: user._id,
+        message: encryptedMessage.encryptedMessage,
+        iv: encryptedMessage.iv,
+        key: encryptedMessage.key,
+    });
+    const newMessage = await newSavedMessage.save();
+    user.savedMessage.push(newMessage._id);
+    await user.save();
+    let info = {
+        iv: newMessage.iv,
+        key: newMessage.key,
+        message: newMessage.message,
+        createdAt: newMessage.createdAt,
+        messageId: newMessage._id,
+    }
+    return info;
+}
+
+const fetchSavedMessages = async(req, res) => {
+    const { userInfo } = req;
+    const data = await SavedMessage.find({
+        _id: { $in: userInfo.savedMessage },
+    }).catch((err) => console.log(err));
+    let result = [];
+    for (const msg of data) {
+        result.push({
+            iv: msg.iv,
+            key: msg.key,
+            message: msg.message,
+            createdAt: msg.createdAt,
+            messageId: msg._id,
+        });
+    }
+    return res.status(200).json({ success: true, savedMessages: result });
+};
+
+const deleteSavedMessage = async(req, res) => {
+    const { userId, messageId } = req.body;
+    const user = await User.findOne({ _id: userId }).catch((err) => {
+        return res.json({ status: false, message: err.message })
+    })
+    await SavedMessage.findByIdAndDelete(messageId);
+    if (user) {
+        const index = user.savedMessages.indexOf(messageId);
+        user.savedMessages.splice(index, 1);
+        await user.save();
+        return res.json({ status: true });
+    }
+}
+
 
 module.exports = {
     login,
@@ -142,5 +199,11 @@ module.exports = {
     getById,
     getByEmail,
     deleteUser,
-    updateUserDetails
-}
+    updateUserDetails,
+    saveMessage,
+    deleteRecipient,
+    deleteSavedMessage,
+    fetchSavedMessages,
+    fetchGroupsByIds,
+    fetchRecipientsByIds,
+};
