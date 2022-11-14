@@ -201,6 +201,87 @@ const getGroupMessages = (req, res) => {
     });
 };
 
+const getMessages = (req, res) => {
+    const { userId, receiverId } = req.body;
+    User.findOne({ _id: userId }, (err, user) => {
+        if (err) {
+            return res.status(500).json({ status: false, message: err.message });
+        } else if (!user) {
+            return res.json({ status: false, message: "user not exist" });
+        } else {
+            User.findOne({ _id: receiverId }, (err, receiver) => {
+                if (err) {
+                    return res.status(500).json({ status: false, message: err.message });
+                } else if (!receiver) {
+                    return res
+                        .status()
+                        .json({ status: false, message: "receiver not exist" });
+                } else {
+                    Message.find({ sender: userId, receiver: receiverId })
+                        .then((messagesSentBySender) => {
+                            Message.find({ sender: receiverId, receiver: userId },
+                                (err, messagesSentByReceiver) => {
+                                    let conversation = messagesSentBySender.concat(
+                                        messagesSentByReceiver
+                                    );
+                                    conversation.sort((a, b) => {
+                                        return new Date(a.createdAt) - new Date(b.createdAt);
+                                    });
+                                    let result = [];
+                                    conversation.forEach((message) => {
+                                        let info;
+                                        if (String(message.sender) === String(userId)) {
+                                            info = {
+                                                sender: {
+                                                    name: user.name,
+                                                    email: user.email,
+                                                    id: user._id,
+                                                },
+                                                receiver: {
+                                                    name: receiver.name,
+                                                    email: receiver.email,
+                                                    id: receiver._id,
+                                                },
+                                                iv: message.iv,
+                                                key: message.key,
+                                                message: message.message,
+                                                createdAt: message.createdAt,
+                                                messageId: message._id,
+                                            };
+                                        } else {
+                                            info = {
+                                                receiver: {
+                                                    name: user.name,
+                                                    email: user.email,
+                                                    id: user._id,
+                                                },
+                                                sender: {
+                                                    name: receiver.name,
+                                                    email: receiver.email,
+                                                    id: receiver._id,
+                                                },
+                                                iv: message.iv,
+                                                key: message.key,
+                                                createdAt: message.createdAt,
+                                                message: message.message,
+                                                messageId: message._id,
+                                            };
+                                        }
+                                        result.push(info);
+                                    });
+                                    return res.json({ status: true, messages: result });
+                                }
+                            );
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                            return res.json({ status: false, message: err.message });
+                        });
+                }
+            });
+        }
+    });
+};
 
 module.exports = {
     createMessage,
