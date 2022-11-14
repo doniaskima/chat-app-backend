@@ -284,11 +284,12 @@ const getMessages = (req, res) => {
 };
 
 module.exports = {
+    getMessages,
+    createGroupMessage,
     createMessage,
     deleteMessages,
+    deleteMessageById,
+    getGroupMessages,
+    startMessage,
     encrypt,
-    getMessages,
-};
-encrypt,
-getMessages,
 };
