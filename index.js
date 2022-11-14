@@ -10,8 +10,9 @@ const socketio = require("socket.io");
 const compression = require("compression");
 const userRouter = require("./routes/user.routes");
 const messageRouter = require("./routes/message.routes");
-const groupRouter = require("./routes/group.route")
-    //DB connection
+const groupRouter = require("./routes/group.route");
+
+//DB connection
 mongoose.connect(process.env.MONGO_DB_URI);
 mongoose.connection.on("connected", () => {
     console.log("DB connected");
@@ -97,6 +98,4 @@ const port = 8000;
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
-});
-console.log(`Example app listening on port ${port}`);
 });
