@@ -189,7 +189,32 @@ const deleteSavedMessage = async(req, res) => {
         await user.save();
         return res.json({ status: true });
     }
-}
+};
+
+const fetchGroupsByIds = async(req, res) => {
+    const { userInfo } = req;
+    const data = await Group.find({ _id: { $in: userInfo.groups } }).catch(
+        (err) => console.log(err)
+    );
+    return res.status(200).json({ success: true, groups: data });
+};
+
+const deleteRecipient = async(req, res) => {
+    const { senderId, recipientId } = req.body;
+
+    const user = await User.findOne({ _id: senderId }).catch((err) => {
+        return res.json({ status: false, message: err.message });
+    });
+    const isMessagesDeleted = deleteMessages(senderId, recipientId);
+    if (user && isMessagesDeleted) {
+        const index = user.chats.indexOf(recipientId);
+        user.chats.splice(index, 1);
+        await user.save();
+        return res.json({ status: true });
+    }
+    return res.json({ status: false, message: "user not found" });
+};
+
 
 
 module.exports = {
@@ -205,5 +230,5 @@ module.exports = {
     deleteSavedMessage,
     fetchSavedMessages,
     fetchGroupsByIds,
-    fetchRecipientsByIds,
+
 };
