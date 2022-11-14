@@ -10,4 +10,3 @@ const {
 router.route("/get_messages").post(getMessages);
 router.route("/get_group_messages").post(getGroupMessages);
 router.route("/:messageId").delete(deleteMessageById);
-router.route("/")
