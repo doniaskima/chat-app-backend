@@ -75,8 +75,25 @@ const removeMember = async(req, res) => {
     }
 }
 
+const deleteGroup = async(req, res) => {
+    const { groupId } = req.params;
+    const group = await Group.findBy(groupId);
+    if (group) {
+        await User.updateMany({ _id: { $in: group.members } }, { $pull: { groups: group._id } });
+        await Message.deleteMany({ receiver: group._id });
+        Group.deleteOne({ _id: groupId }).then(() => {
+                return res.json({ status: true, message: "group deleted" });
+            })
+            .catch((err) => {
+                console.log(err);
+                return res.status(500).json({ status: false, message: err.message });
+            })
+    }
+}
+
 module.exports = {
     createGroup,
     updateGroup,
-    removeMember
+    removeMember,
+    deleteGroup,
 }
