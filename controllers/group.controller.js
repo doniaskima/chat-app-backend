@@ -4,9 +4,7 @@ const User = require("../models/user.model");
 
 const randomCode = () => Math.floor(Math.random() * (1000 - 1) + 1);
 
-
 // Create Group
-
 const createGroup = async(req, res) => {
     const { adminId, groupName, isPublic, description } = req.body;
     const user = await User.findById(adminId);
