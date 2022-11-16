@@ -32,8 +32,33 @@ const createGroup = async(req, res) => {
     return res.json({ status: false, message: "user not found" });
 }
 
+// fetch all public Groups
+
+const fetchAllPublicGroups = (req, res) => {
+
+    Group.find({ isPublic: true }, "name _id description").then((groups) => {
+            return res.json({ status: true, groups: groups });
+        })
+        .catch((err) => {
+            console.log(err);
+            return res.json({ status: false, message: err.message });
+        });
+}
+
+const updateGroup = async(req, res) => {
+    const { groupId, name, description, isPublic } = req.body;
+    const group = await Group.findById(groupId);
+    if (group) {
+        group.name = name;
+        group.description = description;
+        group.isPublic = isPublic;
+        await group.save();
+        return res.json({ status: true, message: "group updated" });
+    }
+    return res.json({ status: false, message: "Invalid group Id" });
+}
 
 module.exports = {
     createGroup,
-    fetchAllPublicGroups
+    updateGroup,
 }

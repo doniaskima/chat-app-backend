@@ -7,5 +7,6 @@ const {
 
 
 router.route("/create").post(createGroup);
+router.route("/")
 
 module.exports = router;
