@@ -58,7 +58,25 @@ const updateGroup = async(req, res) => {
     return res.json({ status: false, message: "Invalid group Id" });
 }
 
+const removeMember = async(req, res) => {
+    try {
+        const { groupId, memeberId } = req.body;
+        const group = await Group.findById(groupId);
+        const user = await User.findById(memberId);
+        let index = group.members.indexOf(memberId);
+        group.members.slice(index, 1);
+        index = user.groups.indexOf(groupId);
+        user.groups.slice(index, 1);
+        await user.save();
+        await group.save();
+        return res.son({ status: true, message: "member removed" });
+    } catch (err) {
+        return res.status(500).json({ status: false, message: err.message });
+    }
+}
+
 module.exports = {
     createGroup,
     updateGroup,
+    removeMember
 }
