@@ -22,8 +22,8 @@ mongoose.connection.on("error", (err) => {
 });
 //import routes
 app.use("/users", userRouter);
-// app.use("/messages", messageRouter);
-// app.use("/groups", groupRouter);
+app.use("/messages", messageRouter);
+app.use("/groups", groupRouter);
 //middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
