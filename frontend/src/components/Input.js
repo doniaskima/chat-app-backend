@@ -2,6 +2,7 @@ export const Input = ({ callback, placeholder, value, type }) => {
   return (
     <input
       type={type}
+      required
       placeholder={placeholder}
       value={value}
       onChange={callback}
