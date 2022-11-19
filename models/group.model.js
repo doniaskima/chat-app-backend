@@ -13,16 +13,15 @@ const groupSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    member: [{
-        typetype: mongoose.Schema.Types.ObjectId,
+    members: [{
+        type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-    }],
+    }, ],
     name: {
         type: String,
         required: true,
     },
 }, { timestamps: true });
-
 
 const Group = mongoose.model("groups", groupSchema);
 
