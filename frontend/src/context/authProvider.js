@@ -2,11 +2,13 @@ import axios from "axios";
 import React, { createContext, useContext, useState } from "react";
 import { BASE_URL } from "../utils/utils";
 import PropTypes from "prop-types";
+import { useNavigate } from "react-router-dom";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
+    const navigate = useNavigate();
+    const [user, setUser] = useState(JSON.parse(localStorage?.getItem("user")));
 
   async function loginWithUserCredentials(email, password) {
     const {
@@ -16,7 +18,9 @@ export const AuthProvider = ({ children }) => {
       password: password,
     });
     if (status) {
-      setUser(user);
+    setUser(user);
+    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem("token", JSON.stringify(token));
     }
     return { user, token, message };
     }
@@ -37,7 +41,11 @@ export const AuthProvider = ({ children }) => {
     return /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/.test(
       email
     );
-  }
+    }
+    const logout = () => {
+    navigate("/", { replace: true });
+    localStorage.clear();
+  };
 
   return (
     <AuthContext.Provider
@@ -46,6 +54,7 @@ export const AuthProvider = ({ children }) => {
         loginWithUserCredentials,
         emailValidate,
         signupWithUserCredentials,
+        logout,
       }}
     >
       {children}
