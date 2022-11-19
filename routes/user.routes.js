@@ -12,6 +12,7 @@ const {
     deleteSavedMessage,
     fetchGroupsByIds,
     fetchSavedMessages,
+    fetchRecipientsByIds,
 } = require("../controllers/user.controller");
 const authenticate = require("../middleware/authenticate");
 
@@ -26,5 +27,6 @@ router.route("/savedMessages/:userId").get(authenticate, fetchSavedMessages);
 router.route("/update/:userId").put(authenticate, updateUserDetails);
 router.route("/deleteRecipient").delete(authenticate, deleteRecipient);
 router.route("/:userId").delete(authenticate, deleteUser);
+router.route("/recipients/:userId").get(authenticate, fetchRecipientsByIds);
 
 module.exports = router;
