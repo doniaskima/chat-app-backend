@@ -92,6 +92,10 @@ io.on("connetion", (socket) => {
         }
     });
 });
+
+app.get("/", (req, res) => {
+    return res.send({ message: "Welcome :))" });
+});
 //routes middleware
 
 const port = 8000;
